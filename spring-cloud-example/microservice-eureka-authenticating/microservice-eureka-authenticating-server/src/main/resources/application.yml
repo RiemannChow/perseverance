@@ -1,0 +1,26 @@
+
+spring:
+  application:
+    name: microservice-eureka-authenticating-server
+
+  security:
+    basic:
+      enabled: true           # 开启基于HTTP basic的认证
+    user:
+      name: user
+      password: test123
+
+server:
+  port: 8761
+
+eureka:
+  instance:
+    hostname: localhost
+  client:
+    register-with-eureka: false
+    fetch-registry: false
+    service-url:
+      default-zone: http://${eureka.instance.hostname}:${server.port}/eureka/
+
+
+
