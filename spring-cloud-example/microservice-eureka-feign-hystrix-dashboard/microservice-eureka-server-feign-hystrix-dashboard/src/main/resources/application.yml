@@ -1,0 +1,16 @@
+
+spring:
+  application:
+    name: microservice-eureka-server-feign-hystrix-dashboard
+
+server:
+  port: 8761
+
+eureka:
+  instance:
+    hostname: localhost
+  client:
+    register-with-eureka: false
+    fetch-registry: false
+    service-url:
+      default-zone: http://${eureka.instance.hostname}:${server.port}/eureka/
