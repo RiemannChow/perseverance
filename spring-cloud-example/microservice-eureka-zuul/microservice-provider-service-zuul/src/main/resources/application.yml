@@ -1,0 +1,25 @@
+server:
+  port: 8763
+
+spring:
+  application:
+    name: microservice-provider-service-zuul
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+
+zuul:
+  routes:
+    api-hi:
+      path: /api-hi/**
+      serviceId: microservice-provider-service-hi
+    api-hi2:
+      path: /api-hi2/**
+      serviceId: microservice-provider-service-hi2
+
+
+
+
+
