@@ -4,11 +4,11 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.riemann</groupId>
-    <artifactId>microservice-eureka</artifactId>
+    <artifactId>microservice-eureka-config</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
-    <name>microservice-eureka</name>
+    <name>microservice-eureka-config</name>
     <description>Example project for Spring Cloud</description>
 
     <parent>
@@ -19,15 +19,15 @@
     </parent>
 
     <modules>
-        <module>microservice-eureka-server</module>
-        <module>microservice-provider-service-hi</module>
+        <module>microservice-eureka-server-config</module>
+        <module>microservice-provider-service-config</module>
     </modules>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>1.8</java.version>
-        <spring-cloud.version>Greenwich.SR3</spring-cloud.version>
+        <spring-cloud.version>Finchley.RELEASE</spring-cloud.version>
     </properties>
 
     <dependencies>

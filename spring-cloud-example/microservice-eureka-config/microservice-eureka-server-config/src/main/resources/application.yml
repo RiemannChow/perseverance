@@ -1,0 +1,15 @@
+server:
+  port: 8888
+
+spring:
+  application:
+    name: microservice-eureka-server-config
+  cloud:
+    config:
+      server:
+        git:
+          uri: https://github.com/riemannChow/SpringCloudConfig
+          username:
+          password:
+          searchPaths: repo
+      label: master
