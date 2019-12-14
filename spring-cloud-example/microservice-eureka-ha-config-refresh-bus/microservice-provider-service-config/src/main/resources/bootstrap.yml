@@ -1,0 +1,35 @@
+server:
+  port: 8889
+
+spring:
+  application:
+    name: microservice-provider-service-config
+  cloud:
+    config:
+      profile: dev
+      label: master
+      discovery:
+        enabled: true
+        service-id: microservice-eureka-server-config
+    bus:
+      enabled: true
+      trace:
+        enabled: true
+
+  rabbitmq:
+    host: localhost
+    port: 15672
+    username: guest
+    password: guest
+
+management:
+  endpoint:
+    web:
+      exposure:
+        include: bus-refresh
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
+
