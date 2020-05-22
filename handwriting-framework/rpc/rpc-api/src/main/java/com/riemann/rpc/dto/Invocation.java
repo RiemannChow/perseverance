@@ -1,7 +1,10 @@
 package com.riemann.rpc.dto;
 
+import lombok.Data;
+
 import java.io.Serializable;
 
+@Data
 public class Invocation implements Serializable {
 
     // 接口名
@@ -16,35 +19,4 @@ public class Invocation implements Serializable {
     // 方法参数值列表
     private Object[] paramValues;
 
-    public String getClassName() {
-        return className;
-    }
-
-    public void setClassName(String className) {
-        this.className = className;
-    }
-
-    public String getMethodName() {
-        return methodName;
-    }
-
-    public void setMethodName(String methodName) {
-        this.methodName = methodName;
-    }
-
-    public Class<?>[] getParamTypes() {
-        return paramTypes;
-    }
-
-    public void setParamTypes(Class<?>[] paramTypes) {
-        this.paramTypes = paramTypes;
-    }
-
-    public Object[] getParamValues() {
-        return paramValues;
-    }
-
-    public void setParamValues(Object[] paramValues) {
-        this.paramValues = paramValues;
-    }
 }
