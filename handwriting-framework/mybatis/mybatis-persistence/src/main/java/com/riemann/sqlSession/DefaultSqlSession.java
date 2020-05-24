@@ -3,6 +3,7 @@ package com.riemann.sqlSession;
 import com.riemann.pojo.Configuration;
 import com.riemann.pojo.MappedStatement;
 
+import java.lang.reflect.*;
 import java.util.List;
 
 public class DefaultSqlSession implements SqlSession {
@@ -30,6 +31,38 @@ public class DefaultSqlSession implements SqlSession {
         } else {
             throw new RuntimeException("查询结果为空或者结果过多！");
         }
+    }
+
+    @Override
+    public <T> T getMapper(Class<?> mapperClass) throws Exception {
+        // 使用JDK动态代理来为Dao层接口生成代理对象，并返回。
+        Object proxyInstance = Proxy.newProxyInstance(mapperClass.getClassLoader(), new Class[]{mapperClass}, new InvocationHandler() {
+            @Override
+            public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+                /**
+                 * 底层都还是去执行JDBC代码
+                 * 根据不同情况来调用findAll或者findByCondition方法
+                 * 准备参数：
+                 * 1.statementId: sql语句的唯一标识 nnamespace.id = 接口全限定名.方法名
+                 */
+                // 方法名
+                String methodNme = method.getName();
+                String className = method.getDeclaringClass().getName();
+
+                String statementId = className + "." + methodNme;
+
+                // 准备参数 2.params:args
+                // 获取被调用方法的返回值类型
+                Type genericReturnType = method.getGenericReturnType();
+                // 判断是否进行了泛型类型参数化
+                if (genericReturnType instanceof ParameterizedType) {
+                    List<Object> objects = selectList(statementId, args);
+                    return objects;
+                }
+                return selectOne(statementId, args);
+            }
+        });
+        return (T) proxyInstance;
     }
 
 }

@@ -1,5 +1,6 @@
 package com.riemann.test;
 
+import com.riemann.dao.UserDao;
 import com.riemann.io.Resources;
 import com.riemann.pojo.User;
 import com.riemann.sqlSession.SqlSession;
@@ -8,6 +9,7 @@ import com.riemann.sqlSession.SqlSessionFactoryBuilder;
 import org.junit.Test;
 
 import java.io.InputStream;
+import java.util.List;
 
 public class PersistenceTest {
 
@@ -21,8 +23,18 @@ public class PersistenceTest {
         User user = new User();
         user.setId(1);
         user.setUsername("riemann");
-        User user2 = sqlSession.selectOne("user.selectOne", user);
-        System.out.println(user2);
+
+//      User user2 = sqlSession.selectOne("user.selectOne", user);
+//      System.out.println(user2);
+
+        UserDao userDao = sqlSession.getMapper(UserDao.class);
+
+        /*User user2 = userDao.findByCondition(user);
+        System.out.println(user2);*/
+
+        List<User> all = userDao.findAll();
+        System.out.println(all);
+
     }
 
 }

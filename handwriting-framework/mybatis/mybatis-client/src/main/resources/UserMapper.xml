@@ -1,7 +1,7 @@
-<mapper namespace="user">
+<mapper namespace="com.riemann.dao.UserDao">
 
     <!--sql的唯一标识：namespace.id来组成 ：statementId-->
-    <select id="selectList" resultType="com.riemann.pojo.User">
+    <select id="findAll" resultType="com.riemann.pojo.User">
         select * from user
     </select>
 
@@ -10,7 +10,7 @@
         user.setId(1);
         user.setUsername("riemann");
     -->
-    <select id="selectOne" resultType="com.riemann.pojo.User" parameterType="com.riemann.pojo.User">
+    <select id="findByCondition" resultType="com.riemann.pojo.User" parameterType="com.riemann.pojo.User">
         select * from user where id = #{id} and username = #{username}
     </select>
 

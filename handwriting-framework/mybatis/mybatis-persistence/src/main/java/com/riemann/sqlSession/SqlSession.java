@@ -22,4 +22,12 @@ public interface SqlSession {
      */
     <T> T selectOne(String statementId, Object... params) throws Exception;
 
+    /**
+     * 为Dao层接口生成代理实现类
+     * @param mapperClass 字节码
+     * @param <T>         泛型
+     * @return            某一对象
+     */
+    <T> T getMapper(Class<?> mapperClass) throws Exception;
+
 }
