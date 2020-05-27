@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+
+<configuration>
+
+    <!--加载外部的properties文件-->
+    <properties resource="jdbc.properties" />
+
+    <!--开启二级缓存-->
+    <settings>
+        <setting name="cacheEnabled" value="true"/>
+    </settings>
+
+    <!--给实体类的全限定类名取别名-->
+    <typeAliases>
+        <!--给单独的实体取别名，如果实体很多的话，不建议此方式-->
+        <!--<typeAlias type="com.riemann.pojo.User" alias="user" />-->
+        <!--批量起别名：该包下所有的类的本身的类名；别名还不区分大小写-->
+        <package name="com.riemann.pojo" />
+    </typeAliases>
+
+    <plugins>
+       <!-- <plugin interceptor="com.riemann.plugin.MyPlugin">
+            <property name="name" value="riemann"/>
+        </plugin>-->
+
+        <plugin interceptor="com.github.pagehelper.PageHelper">
+            <property name="dialect" value="mysql"/>
+        </plugin>
+
+        <plugin interceptor="tk.mybatis.mapper.mapperhelper.MapperInterceptor">
+            <!--指定当前通用mapper接口是哪一个-->
+            <property name="mappers" value="tk.mybatis.mapper.common.Mapper"/>
+        </plugin>
+    </plugins>
+
+    <environments default="development">
+        <environment id="development">
+            <!--当前事务交由JDBC来管理-->
+            <transactionManager type="JDBC" />
+            <!--当前使用mybatis提供的连接池-->
+            <dataSource type="POOLED">
+                <property name="driver" value="${jdbc.driver}" />
+                <property name="url" value="${jdbc.url}" />
+                <property name="username" value="${jdbc.username}" />
+                <property name="password" value="${jdbc.password}" />
+            </dataSource>
+        </environment>
+    </environments>
+
+    <!--引入映射配置文件-->
+    <mappers>
+        <!--普通写法-->
+        <!--<mapper resource="OrderMapper.xml" />-->
+        <!--注解写法-->
+        <!--<mapper class="com.riemann.mapper.UserMapper" />-->
+        <!--上面那个方法如果mapper很多的话，要些很多个，所以这里推荐包扫描-->
+        <!--这里要注意！！！要在resources里建与上面同包同名 这种形式建立目录：com/riemann/mapper-->
+        <package name="com.riemann.mapper"/>
+    </mappers>
+
+</configuration>
