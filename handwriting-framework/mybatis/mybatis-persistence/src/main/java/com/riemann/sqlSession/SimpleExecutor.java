@@ -2,6 +2,7 @@ package com.riemann.sqlSession;
 
 import com.google.common.collect.Lists;
 import com.riemann.config.BoundSql;
+import com.riemann.config.CommandType;
 import com.riemann.pojo.Configuration;
 import com.riemann.pojo.MappedStatement;
 import com.riemann.util.GenericTokenParser;
@@ -15,6 +16,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
+import java.util.Arrays;
 import java.util.List;
 
 public class SimpleExecutor implements Executor {
@@ -51,7 +53,17 @@ public class SimpleExecutor implements Executor {
         }
 
         // 5.执行sql
-        ResultSet resultSet = preparedStatement.executeQuery();
+        String id = mappedStatement.getId();
+        ResultSet resultSet = null;
+        if (!Arrays.asList(CommandType.sqlCommand).contains(id)) {
+            resultSet = preparedStatement.executeQuery();
+        } else {
+            Integer result = preparedStatement.executeUpdate();
+            List<Integer> resultList = Lists.newArrayList();
+            resultList.add(result);
+            return (List<E>) resultList;
+        }
+
         String resultType = mappedStatement.getResultType();
         Class<?> resultTypeClass = getClassType(resultType);
         List<Object> objects = Lists.newArrayList();

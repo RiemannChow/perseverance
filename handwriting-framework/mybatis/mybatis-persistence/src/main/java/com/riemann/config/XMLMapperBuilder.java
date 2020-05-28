@@ -1,5 +1,6 @@
 package com.riemann.config;
 
+import com.google.common.collect.Lists;
 import com.riemann.pojo.Configuration;
 import com.riemann.pojo.MappedStatement;
 import org.dom4j.Document;
@@ -23,8 +24,16 @@ public class XMLMapperBuilder {
         Element rootElement = document.getRootElement();
         String namespace = rootElement.attributeValue("namespace");
 
-        List<Element> list = rootElement.selectNodes("//select");
-        for (Element element : list) {
+        List<Element> selectList = rootElement.selectNodes("//select");
+        List<Element> insertList = rootElement.selectNodes("//insert");
+        List<Element> updateList = rootElement.selectNodes("//update");
+        List<Element> deleteList = rootElement.selectNodes("//delete");
+        List<Element> allList = Lists.newArrayList();
+        allList.addAll(selectList);
+        allList.addAll(insertList);
+        allList.addAll(updateList);
+        allList.addAll(deleteList);
+        for (Element element : allList) {
             String id = element.attributeValue("id");
             String resultType = element.attributeValue("resultType");
             String parameterType = element.attributeValue("parameterType");

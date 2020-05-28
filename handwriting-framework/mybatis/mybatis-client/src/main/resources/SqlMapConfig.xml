@@ -2,7 +2,7 @@
 
     <!--数据库配置信息-->
     <dataSource>
-        <property name="driverClass" value="com.mysql.jdbc.Driver"></property>
+        <property name="driverClass" value="com.mysql.cj.jdbc.Driver"></property>
         <property name="jdbcUrl" value="jdbc:mysql:///mybatis"></property>
         <property name="username" value="root"></property>
         <property name="password" value="root"></property>

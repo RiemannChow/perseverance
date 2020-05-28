@@ -14,4 +14,16 @@
         select * from user where id = #{id} and username = #{username}
     </select>
 
+    <insert id="insert" parameterType="com.riemann.pojo.User">
+        insert into user values (#{id}, #{username})
+    </insert>
+
+    <update id="update" parameterType="com.riemann.pojo.User">
+        update user set username = #{username} where id = #{id}
+    </update>
+
+    <delete id="delete" parameterType="com.riemann.pojo.User">
+        delete from user where id = #{id}
+    </delete>
+
 </mapper>

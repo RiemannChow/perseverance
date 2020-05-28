@@ -1,9 +1,11 @@
 package com.riemann.sqlSession;
 
+import com.riemann.config.CommandType;
 import com.riemann.pojo.Configuration;
 import com.riemann.pojo.MappedStatement;
 
 import java.lang.reflect.*;
+import java.util.Arrays;
 import java.util.List;
 
 public class DefaultSqlSession implements SqlSession {
@@ -18,8 +20,8 @@ public class DefaultSqlSession implements SqlSession {
     public <E> List<E> selectList(String statementId, Object... params) throws Exception {
         // 将要去完成对SimpleExecutor里的query方法的调用
         SimpleExecutor simpleExecutor = new SimpleExecutor();
-        MappedStatement mappedStatement = configuration.getMappedStatementMap().get(statementId);
-        List<Object> list = simpleExecutor.query(configuration, mappedStatement, params);
+        MappedStatement mappedStatement = this.configuration.getMappedStatementMap().get(statementId);
+        List<Object> list = simpleExecutor.query(this.configuration, mappedStatement, params);
         return (List<E>) list;
     }
 
@@ -31,6 +33,13 @@ public class DefaultSqlSession implements SqlSession {
         } else {
             throw new RuntimeException("查询结果为空或者结果过多！");
         }
+    }
+
+    @Override
+    public <T> T update(String statementId, Object... params) throws Exception {
+        SimpleExecutor simpleExecutor = new SimpleExecutor();
+        MappedStatement mappedStatement = this.configuration.getMappedStatementMap().get(statementId);
+        return (T) simpleExecutor.query(this.configuration, mappedStatement, params);
     }
 
     @Override
@@ -46,14 +55,19 @@ public class DefaultSqlSession implements SqlSession {
                  * 1.statementId: sql语句的唯一标识 nnamespace.id = 接口全限定名.方法名
                  */
                 // 方法名
-                String methodNme = method.getName();
+                String methodName = method.getName();
                 String className = method.getDeclaringClass().getName();
 
-                String statementId = className + "." + methodNme;
+                String statementId = className + "." + methodName;
 
                 // 准备参数 2.params:args
                 // 获取被调用方法的返回值类型
                 Type genericReturnType = method.getGenericReturnType();
+
+                if (Arrays.asList(CommandType.sqlCommand).contains(methodName)) {
+                    return update(statementId, args);
+                }
+
                 // 判断是否进行了泛型类型参数化
                 if (genericReturnType instanceof ParameterizedType) {
                     List<Object> objects = selectList(statementId, args);

@@ -19,4 +19,10 @@ public interface UserDao {
      */
     User findByCondition(User user);
 
+    void insert(User user);
+
+    void update(User user);
+
+    void delete(User user);
+
 }
