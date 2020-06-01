@@ -7,6 +7,8 @@
 
     <!--开启二级缓存-->
     <cache></cache>
+    <!--开启二级缓存(分布式)-->
+    <cache type="org.mybatis.caches.redis.RedisCache" />
 
     <resultMap id="userMap" type="com.riemann.pojo.User">
         <result property="id" column="uid" />
@@ -28,7 +30,7 @@
         </collection>
     </resultMap>
 
-    <select id="findAll" resultMap="userMap">
+    <select id="findAll" resultMap="userMap" useCache="false" flushCache="true">
         select * from user u left join orders o on u.id = o.uid
     </select>
 
