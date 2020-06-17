@@ -1,0 +1,12 @@
+package com.riemann.annotation;
+
+import java.lang.annotation.*;
+
+@Target({ElementType.TYPE, ElementType.METHOD})
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+public @interface Security {
+
+    String[] value() default "";
+
+}

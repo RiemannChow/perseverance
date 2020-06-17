@@ -12,4 +12,19 @@ public class RiemannServiceImpl implements RiemannService {
         return name;
     }
 
+    @Override
+    public String getAdminPermission(String name) {
+        return name + " have admin permission";
+    }
+
+    @Override
+    public String getGuestPermission(String name) {
+        return name + " have guest permission";
+    }
+
+    @Override
+    public String getGuestAndAdminPermission(String name) {
+        return name + " have guest and admin permission";
+    }
+
 }

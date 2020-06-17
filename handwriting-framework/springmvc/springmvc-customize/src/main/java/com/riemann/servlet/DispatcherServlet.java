@@ -2,10 +2,10 @@ package com.riemann.servlet;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.riemann.annotation.Autowired;
-import com.riemann.annotation.Controller;
-import com.riemann.annotation.RequestMapping;
-import com.riemann.annotation.Service;
+import com.riemann.annotation.*;
+import com.riemann.interceptor.HandlerExecutionChain;
+import com.riemann.interceptor.HandlerInterceptor;
+import com.riemann.interceptor.SecurityInterceptor;
 import com.riemann.pojo.Handler;
 import org.apache.commons.lang3.StringUtils;
 
@@ -21,6 +21,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -37,7 +38,7 @@ public class DispatcherServlet extends HttpServlet {
 
     // handlerMapping
     // private Map<String, Method> handlerMapping = Maps.newHashMap(); // 存储url和method之间的映射关系
-    private List<Handler> handlerMapping = Lists.newArrayList();
+    private List<HandlerExecutionChain> handlerMapping = Lists.newArrayList();
 
     @Override
     public void init(ServletConfig servletConfig) throws ServletException {
@@ -80,6 +81,13 @@ public class DispatcherServlet extends HttpServlet {
                 baseUrl = annotation.value(); // 等同于 /riemann
             }
 
+            String[] classSecurityInterceptorValue = {};
+            // 如果加了Security注解，则记录该拦截器的值
+            if (clazz.isAnnotationPresent(Security.class)) {
+                Security annotation = clazz.getAnnotation(Security.class);
+                classSecurityInterceptorValue = annotation.value(); // 获取到有权限的username
+            }
+
             // 获取方法
             Method[] methods = clazz.getMethods();
             for (int i = 0; i < methods.length; i++) {
@@ -106,10 +114,36 @@ public class DispatcherServlet extends HttpServlet {
                     }
                 }
 
+                SecurityInterceptor classSecurityInterceptor = null;
+                SecurityInterceptor methodSecurityInterceptor = null;
+
+                if (method.isAnnotationPresent(Security.class)) {
+                    Security methodAnnotation = method.getAnnotation(Security.class);
+                    String[] usernames = methodAnnotation.value(); // 获取到有权限的username
+                    List<String> result = Lists.newArrayList();
+                    result.addAll(Arrays.asList(usernames));
+                    if (classSecurityInterceptorValue.length > 0) {
+                        result.addAll(Arrays.asList(classSecurityInterceptorValue));
+                    }
+                    methodSecurityInterceptor = new SecurityInterceptor();
+                    methodSecurityInterceptor.setHasAuthUsernames(result);
+                } else if (classSecurityInterceptorValue.length > 0) {
+                    classSecurityInterceptor = new SecurityInterceptor();
+                    classSecurityInterceptor.setHasAuthUsernames(Arrays.asList(classSecurityInterceptorValue));
+                }
+
+                HandlerExecutionChain handlerExecutionChain = new HandlerExecutionChain(handler);
+                // 如果当前handler的拦截器不为空，就给当前handler加入拦截器。
+                if (methodSecurityInterceptor != null) {
+                    handlerExecutionChain.getHandlerInterceptors().add(methodSecurityInterceptor);
+                } else if (classSecurityInterceptor != null) {
+                    handlerExecutionChain.getHandlerInterceptors().add(classSecurityInterceptor);
+                }
+
                 // 建立url和method之间的映射关系（map缓存起来）
                 // handlerMapping.put(url, method);
 
-                handlerMapping.add(handler);
+                handlerMapping.add(handlerExecutionChain);
             }
 
         }
@@ -251,9 +285,30 @@ public class DispatcherServlet extends HttpServlet {
         // method.invoke();
 
         // 根据uri获取到我们能够处理当前请求的handler（从handlerMapping中（List））
-        Handler handler = getHandler(req);
-        if (handler == null) {
+        HandlerExecutionChain handlerExecutionChain = getHandlerExecutionChain(req);
+        if (handlerExecutionChain == null) {
             resp.getWriter().write("404 not found");
+            return;
+        }
+
+        Handler handler = handlerExecutionChain.getHandler();
+        if(handler == null) {
+            resp.getWriter().write("404 not found");
+            return;
+        }
+
+        // 先执行拦截器
+        List<HandlerInterceptor> handlerInterceptors = handlerExecutionChain.getHandlerInterceptors();
+        Boolean result = true;
+        for(HandlerInterceptor handlerInterceptor : handlerInterceptors) {
+            result = handlerInterceptor.preHandle(req, resp);
+            if (result == false) {
+                break;
+            }
+        }
+
+        if (result == false) {
+            resp.getWriter().write("403 Forbidden");
             return;
         }
 
@@ -298,14 +353,14 @@ public class DispatcherServlet extends HttpServlet {
         }
     }
 
-    private Handler getHandler(HttpServletRequest req) {
-        if (handlerMapping.isEmpty()) return null;
-        String requestURI = req.getRequestURI();
+    private HandlerExecutionChain getHandlerExecutionChain(HttpServletRequest req) {
+        if(handlerMapping.isEmpty()) return null;
+        String url = req.getRequestURI();
 
-        for (Handler handler : handlerMapping) {
-            Matcher matcher = handler.getPattern().matcher(requestURI);
-            if (!matcher.matches()) continue;
-            return handler;
+        for(HandlerExecutionChain handlerExecutionChain: handlerMapping) {
+            Matcher matcher = handlerExecutionChain.getHandler().getPattern().matcher(url);
+            if(!matcher.matches()){continue;}
+            return handlerExecutionChain;
         }
         return null;
     }

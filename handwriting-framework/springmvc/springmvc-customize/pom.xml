@@ -66,9 +66,9 @@
                     <target>1.8</target>
                     <encoding>UTF-8</encoding>
                     <!--告诉编译器，编译的时候记录下形参的真实名称-->
-                    <compilerArgs>
+                    <!--<compilerArgs>
                         <arg>parameters</arg>
-                    </compilerArgs>
+                    </compilerArgs>-->
                 </configuration>
             </plugin>
             <!-- tomcat7插件 -->
