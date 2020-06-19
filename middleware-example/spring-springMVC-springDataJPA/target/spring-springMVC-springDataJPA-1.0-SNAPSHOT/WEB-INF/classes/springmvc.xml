@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:jpa="http://www.springframework.org/schema/data/jpa"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        https://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context
+        https://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/mvc
+        https://www.springframework.org/schema/mvc/spring-mvc.xsd">
+
+    <!--开启controller扫描-->
+    <context:component-scan base-package="com.riemann">
+        <!--        <context:include-filter type="annotation" expression="org.springframework.web.bind.annotation.ControllerAdvice"/>-->
+    </context:component-scan>
+
+    <!--配置springmvc的视图解析器-->
+    <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name="viewClass" value="org.springframework.web.servlet.view.JstlView"></property>
+        <property name="prefix" value="/WEB-INF/views/"/>
+        <property name="suffix" value=".jsp"/>
+    </bean>
+
+    <mvc:default-servlet-handler/>
+    <!-- 在实际开发中通常都需配置 mvc:annotation-driven标签,这个标签是开启注解 -->
+    <mvc:annotation-driven></mvc:annotation-driven>
+
+
+    <mvc:resources location="/WEB-INF/js/" mapping="/resources/js/**"/>
+    <mvc:resources location="/WEB-INF/css/" mapping="/resources/css/**"/>
+
+    <mvc:interceptors>
+        <!--拦截所有handler-->
+        <!--<bean class="com.lagou.edu.interceptor.MyIntercepter01"/>-->
+
+        <mvc:interceptor>
+            <!--配置当前拦截器的url拦截规则，**代表当前目录下及其子目录下的所有url-->
+            <mvc:mapping path="/**"/>
+            <!--exclude-mapping可以在mapping的基础上排除一些url拦截-->
+            <!--<mvc:exclude-mapping path="/demo/**"/>-->
+            <bean class="com.riemann.interceptor.LoginInterceptor"/>
+        </mvc:interceptor>
+
+    </mvc:interceptors>
+
+</beans>
