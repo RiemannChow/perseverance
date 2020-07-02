@@ -1,6 +1,6 @@
 package com.riemann.server;
 
-import com.riemann.server.servlet.HttpServlet;
+import com.riemann.servlet.HttpServlet;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 

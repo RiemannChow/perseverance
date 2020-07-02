@@ -1,4 +1,4 @@
-package com.riemann.server.utils;
+package com.riemann.utils;
 
 import java.io.IOException;
 import java.io.InputStream;

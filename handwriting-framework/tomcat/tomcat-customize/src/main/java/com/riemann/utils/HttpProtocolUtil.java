@@ -1,4 +1,4 @@
-package com.riemann.server.utils;
+package com.riemann.utils;
 
 /**
  * http协议工具类，主要是提供响应头信息，这里我们只提供200和404的情况

@@ -1,8 +1,8 @@
-package com.riemann.server.servlet;
+package com.riemann.servlet;
 
 import com.riemann.server.Request;
 import com.riemann.server.Response;
-import com.riemann.server.utils.HttpProtocolUtil;
+import com.riemann.utils.HttpProtocolUtil;
 
 import java.io.IOException;
 

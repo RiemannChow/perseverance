@@ -1,18 +1,21 @@
 package com.riemann.server;
 
-import com.riemann.server.servlet.HttpServlet;
+import com.riemann.mapper.Context;
+import com.riemann.mapper.Host;
+import com.riemann.mapper.Mapper;
+import com.riemann.mapper.Wrapper;
+import com.riemann.servlet.HttpServlet;
+import com.riemann.utils.FileUtil;
 import lombok.Data;
 import org.dom4j.Document;
-import org.dom4j.DocumentException;
 import org.dom4j.Element;
-import org.dom4j.Node;
 import org.dom4j.io.SAXReader;
 
-import java.io.IOException;
+import java.io.File;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,6 +39,8 @@ public class Bootstrap {
 
         // 加载解析相关的配置，web.xml
         loadServlet();
+
+        loadWebApps();
 
         // 定义一个线程池
         int corePoolSize = 10;
@@ -154,7 +159,7 @@ public class Bootstrap {
                 Element servletnameElement = (Element) element.selectSingleNode("servlet-name");
                 String servletName = servletnameElement.getStringValue();
 
-                // <servlet-class>com.riemann.server.servlet.RiemannServlet</servlet-class>
+                // <servlet-class>RiemannServlet</servlet-class>
                 Element servletclassElement = (Element) element.selectSingleNode("servlet-class");
                 String servletClass = servletclassElement.getStringValue();
 
@@ -164,6 +169,81 @@ public class Bootstrap {
                 String urlPattern = servletMapping.selectSingleNode("url-pattern").getStringValue();
                 servletMap.put(urlPattern, (HttpServlet) Class.forName(servletClass).newInstance());
             }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void loadWebApps() {
+        InputStream resourceAsStream = this.getClass().getClassLoader().getResourceAsStream("server.xml");
+        SAXReader saxReader = new SAXReader();
+
+        try {
+            Document document = saxReader.read(resourceAsStream);
+            Element rootElement = document.getRootElement();
+            List<Element> selectNodes = rootElement.selectNodes("//Service");
+            for (int i = 0; i < selectNodes.size(); i++) {
+                Element element = selectNodes.get(i);
+                Element connectorElement = element.element("Connector");
+                int port = Integer.parseInt(connectorElement.attribute("port").getValue());
+                Element engineElement = connectorElement.element("Engine");
+                List<Element> hostNodes = engineElement.selectNodes("Host");
+
+                Map<Integer, List<Host>> map = new HashMap<>();
+                List<Host> servletHostList = new ArrayList<>();
+                Mapper mapper = new Mapper();
+
+                for (int j = 0; j < hostNodes.size(); j++) {
+                    Host host = new Host();
+                    Element elementHost = hostNodes.get(j);
+                    // localhost
+                    String name = elementHost.attributeValue("name");
+                    host.setName(name);
+                    // /Users/webapps
+                    String appBase = elementHost.attributeValue("appBase");
+                    host.setAppBase(appBase);
+
+                    File file = new File(appBase);
+                    File[] files = file.listFiles();
+
+                    List<Context> contextList = new ArrayList<>();
+                    // 遍历指定目录
+                    for (int k = 0; k < files.length; k++) {
+                        Context context = new Context();
+                        // 是否是文件夹，如果是文件夹则添加到url，http://localhost:8080/文件夹
+                        if (files[k].isDirectory()) {
+                            String urlKey = name + "/" + files[0].getName();
+                            // 查找webapps目录下的web.xml文件
+                            List<File> webXmlFiles = FileUtil.searchFiles(files[k], "web.xml");
+
+                            List<Wrapper> wrapperList = new ArrayList<>();
+
+                            for (File webXmlFile : webXmlFiles) {
+                                try {
+                                    String nameWebXml = webXmlFile.getName();
+                                    InputStream resource = this.getClass().getClassLoader().getResourceAsStream(nameWebXml);
+                                    Map<String, HttpServlet> mapServlet = FileUtil.loadServlet(urlKey, webXmlFile,
+                                            files[k].getAbsolutePath(), resource);
+                                    Wrapper wrapper = new Wrapper();
+                                    wrapper.setWrapperMap(mapServlet);
+                                    wrapperList.add(wrapper);
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                            String[] split = files[k].getAbsolutePath().split("\\\\");
+                            context.setContextName(split[split.length - 1]);
+                            context.setWrapperList(wrapperList);
+                        }
+                        contextList.add(context);
+                    }
+                    host.setContextList(contextList);
+                    servletHostList.add(host);
+                }
+                map.put(port, servletHostList);
+                mapper.setConnectorMap(map);
+            }
+
         } catch (Exception e) {
             e.printStackTrace();
         }

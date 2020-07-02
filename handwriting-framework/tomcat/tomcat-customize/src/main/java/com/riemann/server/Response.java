@@ -1,7 +1,7 @@
 package com.riemann.server;
 
-import com.riemann.server.utils.HttpProtocolUtil;
-import com.riemann.server.utils.StaticResourceUtil;
+import com.riemann.utils.HttpProtocolUtil;
+import com.riemann.utils.StaticResourceUtil;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 

@@ -2,7 +2,7 @@
 <web-app>
     <servlet>
         <servlet-name>riemann</servlet-name>
-        <servlet-class>com.riemann.server.servlet.RiemannServlet</servlet-class>
+        <servlet-class>com.riemann.servlet.RiemannServlet</servlet-class>
     </servlet>
 
     <servlet-mapping>

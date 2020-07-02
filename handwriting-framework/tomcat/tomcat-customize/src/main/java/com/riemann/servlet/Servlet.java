@@ -1,4 +1,4 @@
-package com.riemann.server.servlet;
+package com.riemann.servlet;
 
 import com.riemann.server.Request;
 import com.riemann.server.Response;
