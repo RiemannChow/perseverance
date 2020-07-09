@@ -159,7 +159,12 @@
     <!--[if IE]>
     <script src="http://cdn.bootcss.com/html5shiv/3.7.3/html5shiv.min.js"></script><![endif]-->
 </head>
+
 <body class="demo form-bg">
+
+<h2>我是服务器：${pageContext.request.localPort}</h2>
+<h2>当前sessionId：${pageContext.session.id}</h2>
+
 <div class="demo form-bg" style="padding: 20px 0;">
     <div class="container">
         <div class="row">

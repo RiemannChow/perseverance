@@ -17,7 +17,16 @@
     <!--1、创建数据库连接池druid-->
 
     <!--引入外部资源文件-->
-    <context:property-placeholder location="classpath:jdbc.properties"/>
+    <context:property-placeholder location="classpath:*.properties"/>
+
+    <!--<bean id="configurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="locations">
+            <list>
+                <value>classpath*:*.properties</value>
+            </list>
+        </property>
+        <property name="ignoreUnresolvablePlaceholders" value="true"/>
+    </bean>-->
 
     <!--第三方jar中的bean定义在xml中-->
     <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource">
@@ -98,6 +107,30 @@
     <!--
         <tx:annotation-driven/>
     -->
+
+    <!-- 配置Redis -->
+    <bean id="redisHttpSessionConfiguration"
+          class="org.springframework.session.data.redis.config.annotation.web.http.RedisHttpSessionConfiguration">
+        <property name="maxInactiveIntervalInSeconds" value="600"/>
+    </bean>
+
+    <bean id="jedisPoolConfig" class="redis.clients.jedis.JedisPoolConfig" >
+        <property name="maxTotal" value="100"/>
+        <property name="maxIdle" value="10"/>
+
+    </bean>
+
+    <bean id="jedisConnectionFactory"
+          class="org.springframework.data.redis.connection.jedis.JedisConnectionFactory"
+          destroy-method="destroy">
+        <property name="hostName" value="${redis.host}"/>
+        <property name="port" value="${redis.port}"/>
+        <property name="timeout" value="${redis.connectionTimeout}"/>
+        <property name="password" value="${redis.password}"/>
+        <property name="database" value="${redis.database}"/>
+        <property name="usePool" value="true"/>
+        <property name="poolConfig" ref="jedisPoolConfig"/>
+    </bean>
 
     <!--6、配置spring包扫描-->
     <context:component-scan base-package="com.riemann"/>
