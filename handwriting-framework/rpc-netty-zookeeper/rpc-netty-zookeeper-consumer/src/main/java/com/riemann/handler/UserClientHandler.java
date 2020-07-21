@@ -1,48 +1,55 @@
 package com.riemann.handler;
 
+import com.riemann.dto.RpcResponse;
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+import lombok.Data;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.concurrent.Callable;
 
 /**
  * 自定义事件处理器
  */
+@Data
 public class UserClientHandler extends ChannelInboundHandlerAdapter implements Callable {
 
-    // 1.定义成员变量
-    private ChannelHandlerContext context; // 事件处理器上下文对象（存储handler写信息，写操作）
-    private String result; // 记录服务器返回的数据
-    private Object param; // 记录将要返回给服务器的数据
+    private String result;
+    private Object para;
+    private Channel channel;
 
-    // 2.实现 channelActive 客户端和服务器连接时，该方法就自动执行。
-    @Override
-    public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        System.out.println("服务器已连接...");
-        // 初始化 ChannelHandlerContext
-        this.context = ctx;
-    }
-
-
-    // 3.实现 channelRead 当我们读到服务器数据，该方法自动执行。
-    @Override
-    public synchronized void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        // 将读到的服务器的数据msg,设置为成员变量的值
-        result = msg.toString();
+    /**
+     * 收到服务端数据，唤醒等待线程
+     */
+    public synchronized void channelRead(ChannelHandlerContext ctx, Object msg) {
+        // 返回的是RpcResponse类型
+        RpcResponse rpcResponse = (RpcResponse)msg;
+        result = rpcResponse.getResult().toString();
         notify();
     }
 
-    // 4.将客户端的数据写到服务器
-    public synchronized Object call() throws Exception {
-        // context 给服务器写数据
-        context.writeAndFlush(param);
-        wait();
+    /**
+     * 写出数据，开始等待唤醒
+     */
+    public synchronized Object call() throws InterruptedException {
+        if (channel == null) {
+            return null;
+        }
+        System.out.println("发送消息到服务端" + channel.remoteAddress());
+        channel.writeAndFlush(para);
+        Instant startInstant = Instant.now();
+        // 超时时间10s
+        long waitTime = 20000;
+        wait(waitTime);
+        Instant endInstance = Instant.now();
+        // 如果超时了，就返回一个timeout
+        if (Duration.between(startInstant, endInstance).getSeconds() >= waitTime / 1000) {
+            System.out.println("返回超时");
+            return "timeout";
+        }
         return result;
-    }
-
-    // 5.设置参数的方法
-    public void setParam(Object param) {
-        this.param = param;
     }
 
 }
