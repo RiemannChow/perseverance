@@ -1,0 +1,76 @@
+server:
+  port: 8096
+
+# 注册到Eureka服务中心
+eureka:
+  client:
+    service-url:
+      # 注册到集群，就把多个Eurekaserver地址使用逗号连接起来即可；注册到单实例（非集群模式），那就写一个就ok
+      defaultZone: http://RiemannCloudEurekaServerA:8761/eureka,http://RiemannCloudEurekaServerB:8762/eureka
+  instance:
+    prefer-ip-address: true  #服务实例中显示ip，而不是显示主机名（兼容老的eureka版本）
+    # 实例名称： 192.168.1.103:riemann-service-resume:8080，我们可以自定义它
+    instance-id: ${spring.cloud.client.ip-address}:${spring.application.name}:${server.port}:@project.version@
+
+spring:
+  application:
+    name: riemann-service-autodeliver
+
+# 针对的被调用方微服务名称,不加就是全局生效
+# riemann-service-resume:
+#  ribbon:
+#    NFLoadBalancerRuleClassName: com.netflix.loadbalancer.RoundRobinRule #负载策略调整
+# springboot中暴露健康检查等断点接口
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  # 暴露健康接口的细节
+  endpoint:
+    health:
+      show-details: always
+
+# 针对的被调用方微服务名称,不加就是全局生效
+riemann-service-resume:
+  ribbon:
+    # 请求连接超时时间
+    ConnectTimeout: 2000
+    # 请求处理超时时间
+    # Feign超时时长设置
+    ReadTimeout: 3000
+    # 对所有操作都进行重试
+    OkToRetryOnAllOperations: true
+    # 根据如上配置，当访问到故障请求的时候，它会再尝试访问一次当前实例（次数由MaxAutoRetries配置），
+    # 如果不行，就换一个实例进行访问，如果还不行，再换一次实例访问（更换次数由MaxAutoRetriesNextServer配置），
+    # 如果依然不行，返回失败信息。
+    MaxAutoRetries: 0 # 对当前选中实例重试次数，不包括第一次调用
+    MaxAutoRetriesNextServer: 0 # 切换实例的重试次数
+    NFLoadBalancerRuleClassName: com.netflix.loadbalancer.RoundRobinRule # 负载策略调整
+
+logging:
+  level:
+    # Feign日志只会对日志级别为debug的做出响应
+    com.riemann.controller.service.ResumeServiceFeignClient: debug
+
+feign:
+  # 开启Feign的熔断功能
+  hystrix:
+    enabled: false
+  # Feign对请求压缩和响应压缩的支持
+  compression:
+    request:
+      enabled: true # 开启请求压缩
+      mime-types: text/html,application/xml,application/json # 设置压缩的数据类型，此处也是默认值
+      min-request-size: 2048 # 设置触发压缩的大小下限，此处也是默认值
+    response:
+      enabled: true # 开启响应压缩
+
+hystrix:
+  command:
+    default:
+      execution:
+        isolation:
+          thread:
+            # Hystrix的超时时长设置
+            timeoutInMilliseconds: 15000
