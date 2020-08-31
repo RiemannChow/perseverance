@@ -1,0 +1,20 @@
+server:
+  port: 9001
+Spring:
+  application:
+    name: riemann-cloud-hystrix-turbine
+eureka:
+  client:
+    serviceUrl: # eureka server的路径
+      defaultZone: http://RiemannCloudEurekaServerA:8761/eureka,http://RiemannCloudEurekaServerB:8762/eureka #把 eureka 集群中的所有 url 都填写了进来，也可以只写一台，因为各个 eureka server 可以同步注册表
+  instance:
+    #使用ip注册，否则会使用主机名注册了（此处考虑到对老版本的兼容，新版本经过实验都是ip）
+    prefer-ip-address: true
+    #自定义实例显示格式，加上版本号，便于多版本管理，注意是ip-address，早期版本是ipAddress
+    instance-id: ${spring.cloud.client.ip-address}:${spring.application.name}:${server.port}:@project.version@
+#turbine配置
+turbine:
+  # appCofing配置需要聚合的服务名称，比如这里聚合自动投递微服务的hystrix监控数据
+  # 如果要聚合多个微服务的监控数据，那么可以使用英文逗号拼接，比如 a,b,c
+  appConfig: riemann-service-autodeliver
+  clusterNameExpression: "'default'"   # 集群默认名称
