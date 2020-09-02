@@ -1,0 +1,55 @@
+server:
+  port: 9002
+
+eureka:
+  client:
+    serviceUrl: # eureka server的路径
+      defaultZone: http://RiemannCloudEurekaServerA:8761/eureka,http://RiemannCloudEurekaServerB:8762/eureka # 把 eureka 集群中的所有 url 都填写了进来，也可以只写一台，因为各个 eureka server 可以同步注册表
+  instance:
+    # 使用ip注册，否则会使用主机名注册了（此处考虑到对老版本的兼容，新版本经过实验都是ip）
+    prefer-ip-address: true
+    # 自定义实例显示格式，加上版本号，便于多版本管理，注意是ip-address，早期版本是ipAddress
+    instance-id: ${spring.cloud.client.ip-address}:${spring.application.name}:${server.port}:@project.version@
+
+spring:
+  application:
+    name: riemann-cloud-gateway
+  cloud:
+    gateway:
+      routes: # 路由可以有多个
+        - id: service-oauth-router # 我们自定义的路由 ID，保持唯一
+          uri: lb://riemann-cloud-oauth-server                                                                    # gateway网关从服务注册中心获取实例信息然后负载后路由
+          predicates: # 断言：路由条件，Predicate 接受一个输入参数，返回一个布尔值结果。该接口包含多种默 认方法来将 Predicate 组合成其他复杂的逻辑（比如：与，或，非）。
+            - Path=/oauth/**
+        - id: service-autodeliver-router # 我们自定义的路由 ID，保持唯一
+          # uri: http://127.0.0.1:8096  # 目标服务地址  自动投递微服务（部署多实例）  动态路由：uri配置的应该是一个服务名称，而不应该是一个具体的服务实例的地址
+          uri: lb://riemann-service-autodeliver # gateway网关从服务注册中心获取实例信息然后负载后路由
+          predicates: # 断言：路由条件，Predicate 接受一个输入参数，返回一个布尔值结果。该接口包含多种默 认方法来将 Predicate 组合成其他复杂的逻辑（比如：与，或，非）。
+            - Path=/autodeliver/**
+        - id: service-resume-router          # 我们自定义的路由 ID，保持唯一
+          # uri: http://127.0.0.1:8081       # 目标服务地址
+          # http://localhost:9002/resume/openstate/1545132
+          # http://127.0.0.1:8081/openstate/1545132
+          uri: lb://riemann-service-resume
+          predicates: # 断言：路由条件，Predicate 接受一个输入参数，返回一个布尔值结果。该接口包含多种默 认方法来将 Predicate 组合成其他复杂的逻辑（比如：与，或，非）。
+            - Path=/resume/**
+          filters:
+            - StripPrefix=1
+  zipkin:
+    base-url: http://127.0.0.1:9411 # zipkin server的请求地址
+    sender:
+      # web 客户端将踪迹日志数据通过网络请求的方式传送到服务端，另外还有配置
+      # kafka/rabbit 客户端将踪迹日志数据传递到mq进行中转
+      type: web
+  sleuth:
+    sampler:
+      # 采样率 1 代表100%全部采集 ，默认0.1 代表10% 的请求踪迹数据会被采集
+      # 生产环境下，请求量非常大，没有必要所有请求的踪迹数据都采集分析，对于网络包括server端压力都是比较大的，可以配置采样率采集一定比例的请求的踪迹数据进行分析即可
+      probability: 1
+
+
+# 分布式链路追踪
+logging:
+  level:
+    org.springframework.web.servlet.DispatcherServlet: debug
+    org.springframework.cloud.sleuth: debug
