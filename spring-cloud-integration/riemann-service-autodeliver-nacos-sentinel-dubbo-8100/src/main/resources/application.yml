@@ -1,0 +1,41 @@
+server:
+  port: 8100
+
+spring:
+  application:
+    name: riemann-service-autodeliver
+  main:
+    allow-bean-definition-overriding: true
+  cloud:
+    nacos:
+      discovery:
+        # 集群配置的话，以逗号连接起来
+        server-addr: 127.0.0.1:8848
+    sentinel:
+      transport:
+        dashboard: 127.0.0.1:8080 # sentinel dashboard/console 地址
+        port: 8719 # sentinel会在该端口启动http server，那么这样的话，控制台定义的一些限流等规则才能发送传递过来，
+        # 如果8719端口被占用，那么会依次+1
+
+# 针对的被调用方微服务名称,不加就是全局生效
+# riemann-service-resume:
+#  ribbon:
+#    NFLoadBalancerRuleClassName: com.netflix.loadbalancer.RoundRobinRule #负载策略调整
+# springboot中暴露健康检查等断点接口
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  # 暴露健康接口的细节
+  endpoint:
+    health:
+      show-details: always
+
+dubbo:
+  registry:
+    # 挂载到 Spring Cloud 注册中心
+    address: spring-cloud://localhost
+  cloud:
+    # 订阅服务提供方的应用列表，订阅多个服务提供者使用 "," 连接
+    subscribed-services: riemann-service-resume
