@@ -1,0 +1,66 @@
+server:
+  port: 8099
+
+spring:
+  application:
+    name: riemann-service-autodeliver
+  cloud:
+    nacos:
+      discovery:
+        # 集群配置的话，以逗号连接起来
+        server-addr: 127.0.0.1:8848
+    sentinel:
+      transport:
+        dashboard: 127.0.0.1:8080 # sentinel dashboard/console 地址
+        port: 8719 # sentinel会在该端口启动http server，那么这样的话，控制台定义的一些限流等规则才能发送传递过来，
+        # 如果8719端口被占用，那么会依次+1
+    datasource:
+      # 此处的flow为自定义数据源名
+      flow: # 流控规则
+        nacos:
+          server-addr: ${spring.cloud.nacos.discovery.server-addr} data-id: ${spring.application.name}-flow-rules
+          groupId: DEFAULT_GROUP
+          data-type: json
+          rule-type: flow # 类型来自RuleType类
+      degrade:
+        nacos:
+          server-addr: ${spring.cloud.nacos.discovery.server-addr} data-id: ${spring.application.name}-degrade-rules groupId: DEFAULT_GROUP
+            data-type: json
+            rule-type: degrade # 类型来自RuleType类
+
+# 针对的被调用方微服务名称,不加就是全局生效
+# riemann-service-resume:
+#  ribbon:
+#    NFLoadBalancerRuleClassName: com.netflix.loadbalancer.RoundRobinRule #负载策略调整
+# springboot中暴露健康检查等断点接口
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  # 暴露健康接口的细节
+  endpoint:
+    health:
+      show-details: always
+
+# 针对的被调用方微服务名称,不加就是全局生效
+riemann-service-resume:
+  ribbon:
+    # 请求连接超时时间
+    ConnectTimeout: 2000
+    # 请求处理超时时间
+    # Feign超时时长设置
+    ReadTimeout: 3000
+    # 对所有操作都进行重试
+    OkToRetryOnAllOperations: true
+    # 根据如上配置，当访问到故障请求的时候，它会再尝试访问一次当前实例（次数由MaxAutoRetries配置），
+    # 如果不行，就换一个实例进行访问，如果还不行，再换一次实例访问（更换次数由MaxAutoRetriesNextServer配置），
+    # 如果依然不行，返回失败信息。
+    MaxAutoRetries: 0 # 对当前选中实例重试次数，不包括第一次调用
+    MaxAutoRetriesNextServer: 0 # 切换实例的重试次数
+    NFLoadBalancerRuleClassName: com.netflix.loadbalancer.RoundRobinRule # 负载策略调整
+
+logging:
+  level:
+    # Feign日志只会对日志级别为debug的做出响应
+    com.riemann.controller.service.ResumeServiceFeignClient: debug
