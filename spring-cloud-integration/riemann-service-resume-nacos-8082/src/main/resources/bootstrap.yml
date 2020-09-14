@@ -1,0 +1,45 @@
+server:
+  port: 8082
+
+spring:
+  application:
+    name: riemann-service-resume
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/spring?useUnicode=true&characterEncoding=utf8
+    username: root
+    password: root
+  jpa:
+    database: MySQL
+    show-sql: true
+    hibernate:
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl  #避免将驼峰命名转换为下划线命名
+  # nacos配置
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848
+      # nacos config配置
+      config:
+        server-addr: 127.0.0.1:8848
+        # 锁定server端的配置文件（读取它的配置项）
+        namespace: 90173174-2b9e-4ba6-bd38-75f669a79e1c # 命名空间id
+        group: DEFAULT_GROUP # 默认分组DEFAULT_GROUP
+        file-extension: yaml
+        # 根据规则拼接出来的dataId效果，riemann-service-resume.yaml
+        # 扩展配置
+        ext-config[0]:
+          data-id: abc.yaml
+          group: DEFAULT_GROUP
+          refresh: true # 开启扩展dataId的动态刷新
+        ext-config[1]:
+          data-id: def.yaml
+          group: DEFAULT_GROUP
+          refresh: true # 开启扩展dataId的动态刷新
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
