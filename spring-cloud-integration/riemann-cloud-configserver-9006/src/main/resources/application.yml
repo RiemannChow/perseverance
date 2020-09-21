@@ -19,11 +19,11 @@ spring:
     config:
       server:
         git:
-          uri: https://github.com/riemannChow/SpringCloudConfig #配置git服务地址
-          username: xxx@qq.com # 配置git用户名
-          password: xxx # 配置git密码
+          uri: https://github.com/riemannChow/SpringCloudConfig.git #配置git服务地址
+          username: 754798352@qq.com # 配置git用户名
+          password: zhou358117139 # 配置git密码
           search-paths:
-            - riemann-config-repo
+            - SpringCloudConfig
       # 读取分支
       label: master
   rabbitmq:
