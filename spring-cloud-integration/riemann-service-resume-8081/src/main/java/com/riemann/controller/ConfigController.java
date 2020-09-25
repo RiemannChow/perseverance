@@ -20,7 +20,6 @@ public class ConfigController {
     @Value("${mysql.url}")
     private String mysqlUrl;
 
-
     // 内存级别的配置信息
     // 数据库，redis配置信息
 
@@ -28,4 +27,5 @@ public class ConfigController {
     public String viewconfig() {
         return "riemannMessage==>" + riemannMessage  + " mysqlUrl=>" + mysqlUrl;
     }
+
 }

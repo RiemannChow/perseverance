@@ -1,10 +1,11 @@
 server:
   port: 8081
+
 spring:
   application:
     name: riemann-service-resume
   datasource:
-    driver-class-name: com.mysql.jdbc.Driver
+    driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/spring?useUnicode=true&characterEncoding=utf8
     username: root
     password: root
@@ -17,7 +18,7 @@ spring:
   cloud:
     # config客户端配置,和ConfigServer通信，并告知ConfigServer希望获取的配置信息在哪个文件中
     config:
-      name: lagou-service-resume  #配置文件名称
+      name: riemann-service-resume  #配置文件名称
       profile: dev  #后缀名称
       label: master #分支名称
       uri: http://localhost:9006    #ConfigServer配置中心地址
@@ -26,6 +27,7 @@ spring:
     port: 5672
     username: guest
     password: guest
+
 #注册到Eureka服务中心
 eureka:
   client:
@@ -40,6 +42,7 @@ eureka:
     metadata-map:
       cluster: cl1
       region: rn1
+
 management:
   endpoints:
     web:
