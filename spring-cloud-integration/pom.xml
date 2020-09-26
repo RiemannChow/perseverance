@@ -11,18 +11,27 @@
         <module>riemann-service-common</module>
         <module>riemann-service-autodeliver-8090</module>
         <module>riemann-service-autodeliver-8091</module>
+        <module>riemann-service-autodeliver-feign-8096</module>
         <module>riemann-service-resume-8080</module>
         <module>riemann-service-resume-8081</module>
+        <module>riemann-service-resume-nacos-8082</module>
         <module>riemann-cloud-eureka-server-8761</module>
         <module>riemann-cloud-eureka-server-8762</module>
         <module>riemann-cloud-hystrix-dashboard-9000</module>
         <module>riemann-cloud-hystrix-turbine-9001</module>
-        <module>lagou-service-autodeliver-8096</module>
-        <module>lagou-cloud-configserver-9006</module>
-        <module>lagou-cloud-stream-producer-9090</module>
-        <module>lagou-cloud-stream-consumer-9091</module>
-        <module>lagou-cloud-stream-consumer-9092</module>
-        <module>riemann-service-resume-8080</module>
+        <module>riemann-cloud-gateway-9002</module>
+        <module>riemann-cloud-configserver-9006</module>
+        <module>riemann-cloud-stream-producer-9090</module>
+        <module>riemann-cloud-stream-consumer-9091</module>
+        <module>riemann-cloud-stream-consumer-9092</module>
+        <module>riemann-cloud-zipkin-server-9411</module>
+        <module>riemann-cloud-oauth-server-9999</module>
+        <module>riemann-service-autodeliver-nacos-8097</module>
+        <module>riemann-service-autodeliver-sentinel-8099</module>
+        <module>riemann-service-resume-nacos-8084</module>
+        <module>riemann-service-autodeliver-nacos-sentinel-dubbo-8100</module>
+        <module>riemann-service-resume-nacos-sentinel-dubbo-8085</module>
+        <module>riemann-service-dubbo-api</module>
     </modules>
     <!--父工程打包方式为pom-->
     <packaging>pom</packaging>
@@ -44,9 +53,16 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+            <!--SCA -->
+            <dependency>
+                <groupId>com.alibaba.cloud</groupId>
+                <artifactId>spring-cloud-alibaba-dependencies</artifactId>
+                <version>2.1.0.RELEASE</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
         </dependencies>
     </dependencyManagement>
-
 
     <dependencies>
         <!--web依赖-->
@@ -84,11 +100,12 @@
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
         <!--热部署-->
-        <dependency>
+        <!--Nacos+Sentinel+Dubbo整合需要去掉devtools-->
+        <!--<dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-devtools</artifactId>
             <optional>true</optional>
-        </dependency>
+        </dependency>-->
 
         <!--eureka server 需要引入Jaxb，开始-->
         <dependency>
@@ -120,6 +137,18 @@
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-commons</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-openfeign-core</artifactId>
+            <version>2.1.3.RELEASE</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.github.openfeign</groupId>
+            <artifactId>feign-core</artifactId>
+            <version>10.2.3</version>
+            <scope>compile</scope>
         </dependency>
 
         <!--&lt;!&ndash;spring cloud commons模块引入&ndash;&gt;
