@@ -1,0 +1,15 @@
+server:
+  port: 9000
+spring:
+  application:
+    name: riemann-cloud-eureka-server
+eureka:
+  instance:
+    hostname: RiemannCloudEurekaServerA
+  client:
+    service-url: # 客户端与EurekaServer交互的地址，如果是集群，也需要写其它Server的地址
+      defaultZone: http://RiemannCloudEurekaServerB:9001/eureka/
+    register-with-eureka: true # 自己就是服务不需要注册自己
+    fetch-registry: true # 自己就是服务不需要从Eureka Server获取服务信息,默认为true，置为false
+  dashboard:
+    enabled: true
