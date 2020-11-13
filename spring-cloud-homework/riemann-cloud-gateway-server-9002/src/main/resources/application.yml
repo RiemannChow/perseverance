@@ -1,0 +1,4 @@
+control:
+  limit:
+    number: 20
+    time: 10000
