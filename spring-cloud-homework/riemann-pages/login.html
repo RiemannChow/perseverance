@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>登录</title>
+    <!-- 引入样式 -->
+    <link href="https://cdn.bootcdn.net/ajax/libs/element-ui/2.13.1/theme-chalk/index.css" rel="stylesheet">
+    <style>
+        .app {
+            width: 500px;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body>
+<div id="app" class="app">
+    <el-form ref="form" :model="form" :rules="rules" label-width="80px">
+        <el-form-item prop="email" label="邮箱">
+            <el-input v-model="form.email"></el-input>
+        </el-form-item>
+        <el-form-item label="密码" prop="password">
+            <el-input v-model="form.password" type="password"></el-input>
+        </el-form-item>
+        <el-form-item>
+            <el-button type="primary" @click="onSubmit">登录</el-button>
+        </el-form-item>
+        <el-form-item>
+            <el-link href="./register.html" type="primary">注册新账号</el-link>
+        </el-form-item>
+    </el-form>
+</div>
+</body>
+<script src="https://cdn.bootcdn.net/ajax/libs/vue/2.6.11/vue.min.js"></script>
+<!-- 引入组件库 -->
+<script src="https://cdn.bootcdn.net/ajax/libs/element-ui/2.13.1/index.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/axios/0.19.2/axios.min.js"></script>
+<script>
+    new Vue({
+        el: '#app',
+        data: function() {
+            return {
+                form: {
+                    email: '',
+                    password: '',
+                },
+                rules: {
+                    email: [
+                        { required: true, message: '请输入邮箱地址', trigger: 'blur' },
+                        { type: 'email', message: '请输入正确的邮箱地址', trigger: ['blur', 'change'] },
+                    ],
+                    password: [
+                        {required: true, message: '请输入密码', trigger: 'blur'},
+                        {min: 3, max: 20, message: '长度在 3 到 20 个字符', trigger: 'blur'}
+                    ],
+                }
+            }
+        },
+        methods: {
+            onSubmit(formName) {
+                this.$refs.form.validate((valid) => {
+                    if (valid) {
+                        this.submitForm();
+                    } else {
+                        console.log('error submit!!');
+                        return false;
+                    }
+                });
+            },
+            submitForm() {
+                let url = '/api/user/login/'+ this.form.email + '/' + this.form.password;
+                axios.post(url)
+                .then((response) => {
+                    if (response.data) {
+                        this.$message({
+                            message: '登录成功！页面即将自动跳转...',
+                            type: 'success'
+                        });
+                        setTimeout(() => {
+                            window.location = './welcome.html';
+                        }, 300);
+                    } else {
+                        this.$message({
+                            message: '登录失败，请检查用户名和密码。',
+                            type: 'warning'
+                        });
+                    }
+                }).catch((err) => {
+                    console.error(err);
+                });
+            },
+            resetForm() {
+                this.$refs.form.resetFields();
+            }
+        }
+    })
+</script>
+</html>
