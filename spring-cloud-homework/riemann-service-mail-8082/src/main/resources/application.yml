@@ -1,0 +1,28 @@
+## QQ邮箱配置
+spring:
+  mail:
+    protocol: smtp
+    host: smtp.qq.com
+    port: 465
+    auth: true
+    username: 754798352@qq.com
+    password: rvezvzjvmulubedg
+    from: 754798352@qq.com
+    default-encoding: utf-8
+    properties:
+      mail:
+        smtp:
+          ssl:
+            enable: true
+
+#spring:
+#  mail:
+#    host: smtp.qq.com # 发送邮件服务器
+#    username: 754798353@qq.com # 发送邮件的邮箱地址
+#    password: rvezvzjvmulubedg # 客户端授权码，不是邮箱密码，这个在qq邮箱设置里面自动生成的
+#    from: 754798353@qq.com # 发送邮件的地址，和上面username一致
+#    properties.mail.smtp.port: 465 #端口号465或587
+#    properties.mail.smtp.starttls.enable: true
+#    properties.mail.smtp.starttls.required: true
+#    properties.mail.smtp.ssl.enable: true
+#    default-encoding: utf-8
