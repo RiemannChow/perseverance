@@ -1,0 +1,44 @@
+server:
+  port: 8080 # 后期该微服务多实例，端口从8080递增(10个以内)
+
+spring:
+  application:
+    name: riemann-service-user
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/spring?useUnicode=true&characterEncoding=utf8
+    username: root
+    password: root
+  jpa:
+    database: MySQL
+    show-sql: true
+    hibernate:
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl #避免将驼峰 命名转换为下划线命名
+  cloud: # config客户端配置,和ConfigServer通信，并告知ConfigServer希望获取的配置信息在哪个文件中
+    config:
+      name: riemann-service-user # 配置文件名称
+      profile: dev # 后缀名称
+      label: master # 分支名称
+      discovery:
+        enabled: true  # 开启
+        service-id: riemann-cloud-config # 指定配置中心服务端的server-id
+  rabbitmq:
+    host: 192.168.31.199
+    port: 5672
+    username: guest
+    password: guest
+
+eureka:
+  client:
+    serviceUrl: # eureka server的路径
+      defaultZone: http://RiemannCloudEurekaServerA:9000/eureka,http://RiemannCloudEurekaServerB:9001/eureka #把 eureka 集群中的所有 url 都填写了进来，也可以只写一台，因为各个 eureka server 可以同步注册表
+  instance: # 使用ip注册，否则会使用主机名注册了(此处考虑到对老版本的兼容，新版本经过实验都是ip)
+    prefer-ip-address: true # 自定义实例显示格式，加上版本号，便于多版本管理，注意是ip-address，早期版本是ipAddress
+    instance-id: ${spring.cloud.client.ip-address}:${spring.application.name}:${server.port}:@project.version@
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
