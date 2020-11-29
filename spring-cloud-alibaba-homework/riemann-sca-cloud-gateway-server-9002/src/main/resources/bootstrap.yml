@@ -1,0 +1,71 @@
+server:
+  port: 9002
+
+spring:
+  application:
+    name: riemann-cloud-gateway
+    main:
+      allow-bean-definition-overriding: true
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848 # 配置nacos server地址
+      locator:
+        enabled: true
+        lowerCaseServiceId: true
+      config:
+        server-addr: 127.0.0.1:8848
+        namespace: 90173174-2b9e-4ba6-bd38-75f669a79e1c
+        group: DEFAULT_GROUP
+        file-extension: yaml
+    sentinel:
+      transport:
+        dashboard: 127.0.0.1:8080 # sentinel dashboard/console 地址
+        port: 8719 # sentinel会在该端口启动http server，那么这样的话，控制台定义的一些限流等规则才能发送传递过来，
+      datasource:
+        # 此处的flow为自定义数据源名
+        flow: # 流控规则
+          nacos:
+            server-addr: ${spring.cloud.nacos.config.server-addr}
+            data-id: ${spring.application.name}-flow-rules
+            group-id: DEFAULT_GROUP
+            data-type: json
+            rule-type: flow # 类型来自RuleType类
+        degrade:
+          nacos:
+            server-addr: ${spring.cloud.nacos.config.server-addr}
+            data-id: ${spring.application.name}-degrade-rules
+            group-id: DEFAULT_GROUP
+            data-type: json
+            rule-type: degrade # 类型来自RuleType类
+    gateway:
+      enabled: true
+      discovery:
+        locator:
+          lower-case-service-id: true
+      routes: # 路由可以有多个
+        - id: service-user-router # 我们自定义的路由 ID，保持唯一
+          uri: lb://riemann-service-user # 目标服务地址，动态路由:uri配置的应该是一个服务名称，而不应该是一个具体的服务实例的地址
+          # gateway网关从服务注册中心获取实例信息然后负载后路由
+          predicates:
+            - Path=/api/user/**
+        - id: service-code-router
+          uri: lb://riemann-service-code
+          predicates:
+            - Path=/api/code/**
+        - id: service-mail-router
+          uri: lb://riemann-service-mail
+          predicates:
+            - Path=/api/email/**
+dubbo:
+  registry:
+    # 挂载到 Spring Cloud 的注册中心
+    address: spring-cloud://localhost
+  cloud:
+    subscribed-services: riemann-service-user
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
