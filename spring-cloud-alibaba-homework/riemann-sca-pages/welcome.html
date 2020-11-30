@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>欢迎页</title>
+    <!-- 引入样式 -->
+    <link href="https://cdn.bootcdn.net/ajax/libs/element-ui/2.13.1/theme-chalk/index.css" rel="stylesheet">
+    <style>
+        .app {
+            width: 500px;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body>
+<div id="app" class="app">
+    <div v-loading.fullscreen.lock="fullscreenLoading">
+        <h2 v-html="message"></h2>
+    </div>
+</div>
+</body>
+<script src="https://cdn.bootcdn.net/ajax/libs/vue/2.6.11/vue.min.js"></script>
+<!-- 引入组件库 -->
+<script src="https://cdn.bootcdn.net/ajax/libs/element-ui/2.13.1/index.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/axios/0.19.2/axios.min.js"></script>
+<script>
+    new Vue({
+        el: '#app',
+        data: function() {
+            return {
+                message: '',
+                fullscreenLoading: true
+            }
+        },
+        created() {
+           this.init();
+        },
+        methods: {
+            init() {
+                let url = '/api/user/info/xxx';
+                axios.post(url)
+                .then((response) => {
+                    if (response.data) {
+                        this.message = '欢迎登录' + response.data;
+                    } else {
+                        this.message = '无权访问';
+                    }
+                    this.fullscreenLoading = false;
+                }).catch((err) => {
+                    console.error(err);
+                    this.message = '<a href="./login.html">未授权，点击此处登录</a>';
+                    this.fullscreenLoading = false;
+                });
+            },
+        }
+    })
+</script>
+</html>

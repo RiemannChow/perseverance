@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>注册</title>
+    <!-- 引入样式 -->
+    <link href="https://cdn.bootcdn.net/ajax/libs/element-ui/2.13.1/theme-chalk/index.css" rel="stylesheet">
+    <style>
+        .app {
+            width: 500px;
+            margin: 100px auto;
+        }
+    </style>
+</head>
+<body>
+<div id="app" class="app">
+    <el-form ref="form" :model="form" :rules="rules" label-width="80px">
+        <el-form-item prop="email" label="邮箱">
+            <el-input v-model="form.email"></el-input>
+        </el-form-item>
+        <el-form-item label="密码" prop="password">
+            <el-input v-model="form.password" type="password"></el-input>
+        </el-form-item>
+        <el-form-item label="确认密码" prop="ConfirmPassword">
+            <el-input v-model="form.ConfirmPassword" type="password"></el-input>
+        </el-form-item>
+        <el-form-item label="验证码" prop="code">
+            <el-input v-model="form.code"></el-input>
+            <el-link type="primary" @click="getCode" :disabled="getCodeDisabled" v-text="getCodeLabel"></el-link>
+        </el-form-item>
+        <el-form-item>
+            <el-button type="primary" @click="onSubmit">注册</el-button>
+        </el-form-item>
+    </el-form>
+</div>
+</body>
+<script src="https://cdn.bootcdn.net/ajax/libs/vue/2.6.11/vue.min.js"></script>
+<!-- 引入组件库 -->
+<script src="https://cdn.bootcdn.net/ajax/libs/element-ui/2.13.1/index.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/axios/0.19.2/axios.min.js"></script>
+<script>
+    new Vue({
+        el: '#app',
+        data: function() {
+            var validatePass = (rule, value, callback) => {
+                if (value === '') {
+                    callback(new Error('请再次输入密码'));
+                } else if (value !== this.form.password) {
+                    callback(new Error('两次输入密码不一致!'));
+                } else {
+                    callback();
+                }
+            };
+            var validateRepeatEmail = (rule, value, callback) => {
+                let url = '/api/user/isRegistered/'+ this.form.email;
+                axios.post(url)
+                .then((response) => {
+                    if (response.data) {
+                        callback(new Error('该邮箱已被注册!'));
+                    } else {
+                        callback();
+                    }
+                }).catch((err) => {
+                    callback();
+                    console.error(err);
+                });
+            };
+            return {
+                form: {
+                    email: '754798352@qq.com',
+                    password: '',
+                    ConfirmPassword: '',
+                    code: ''
+                },
+                rules: {
+                    email: [
+                        { required: true, message: '请输入邮箱地址', trigger: 'blur' },
+                        { type: 'email', message: '请输入正确的邮箱地址', trigger: 'blur' },
+                        { validator: validateRepeatEmail, trigger: 'blur' }
+                    ],
+                    password: [
+                        {required: true, message: '请输入密码', trigger: 'blur'},
+                        {min: 3, max: 20, message: '长度在 3 到 20 个字符', trigger: 'blur'}
+                    ],
+                    ConfirmPassword: [
+                        {required: true, message: '请再次输入密码', trigger: 'blur'},
+                        { validator: validatePass, trigger: 'blur' }
+                    ],
+                    code: [
+                        {required: true, message: '请输入验证码', trigger: 'blur'},
+                        {min: 6, max: 6, message: '长度为6个字符', trigger: 'blur'}
+                    ],
+                },
+                getCodeDisabled: false,
+                getCodeLabel: '获取验证码'
+            }
+        },
+        methods: {
+            onSubmit() {
+                this.$refs.form.validate((valid) => {
+                    if (valid) {
+                        this.submitForm();
+                    } else {
+                        console.log('error submit!!');
+                        return false;
+                    }
+                });
+            },
+            submitForm() {
+                let url = '/api/user/register/'+ this.form.email + '/' + this.form.password + '/' + this.form.code;
+                axios.post(url)
+                .then((response) => {
+                    let data = response.data * 1;
+                    if (data === 0) {
+                        this.$message({
+                            message: '注册成功！页面即将自动跳转',
+                            type: 'success'
+                        });
+                        setTimeout(() => {
+                            window.location = './welcome.html';
+                        }, 300);
+                    } else if (data === 1) {
+                        this.$message({
+                            message: '注册失败，验证不正确，请重新输入。',
+                            type: 'warning'
+                        });
+                    } else if (data === 2) {
+                        this.$message({
+                            message: '注册失败，验证码已超时，请重新获取。',
+                            type: 'warning'
+                        });
+                    } else {
+                        this.$message({
+                            message: '注册失败，' + response.data,
+                            type: 'warning'
+                        });
+                    }
+                }).catch((err) => {
+                    console.error(err);
+                    this.$message({
+                        message: '注册失败',
+                        type: 'warning'
+                    });
+                });
+            },
+            getCode() {
+                if (!this.form.email) {
+                    this.$message({
+                        message: '请输入邮箱',
+                        type: 'warning'
+                    });
+                    return;
+                }
+                this.getCodeDisabled = true;
+                let url = '/api/code/create/' + this.form.email;
+                axios.post(url)
+                .then((response) => {
+                    if (response.data) {
+                        this.$message({
+                            message: '验证码发送成功，请到邮箱中查收。',
+                            type: 'success'
+                        });
+                        this.countDown(60);
+                    } else {
+                        this.$message({
+                            message: '验证码发送失败，请稍后再试。',
+                            type: 'warning'
+                        });
+                        this.countDown(10);
+                    }
+                }).catch((err) => {
+                    this.countDown(10);
+                    console.error(err);
+                });
+            },
+            resetForm() {
+                this.$refs.form.resetFields();
+            },
+            countDown(time) {
+                if (time === 0) {
+                    this.getCodeLabel = '获取验证码';
+                    this.getCodeDisabled = false;
+                    return;
+                }
+
+                this.getCodeLabel = time + '秒后可以重新获取';
+                setTimeout(() => {
+                    this.countDown(time - 1);
+                }, 1000);
+            }
+        }
+    })
+</script>
+</html>
