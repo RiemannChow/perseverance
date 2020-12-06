@@ -1,0 +1,40 @@
+server:
+  port: 8082
+
+spring:
+  application:
+    name: riemann-service-mail
+  main:
+    allow-bean-definition-overriding: true
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848 # 配置nacos server地址
+      config:
+        server-addr: 127.0.0.1:8848
+        namespace: 90173174-2b9e-4ba6-bd38-75f669a79e1c
+        group: DEFAULT_GROUP
+        file-extension: yaml
+  sentinel:
+    transport:
+      dashboard: 127.0.0.1:8080 # sentinel dashboard/console 地址
+      port: 8719 # sentinel会在该端口启动http server，那么这样的话，控制台定 义的一些限流等规则才能发送传递过来，
+
+dubbo:
+  scan:
+    # dubbo 服务扫描基准包
+    base-packages: com.riemann.service
+  protocol:
+    # dubbo 协议
+    name: dubbo
+    # dubbo 协议端口( -1 表示自增端口，从 20880 开始)
+    port: -1
+  registry:
+    # 挂载到 Spring Cloud 的注册中心
+    address: spring-cloud://localhost
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
