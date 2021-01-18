@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        .item {
+            margin: 10px;
+            border: 1px solid forestgreen;
+        }
+    </style>
+</head>
+<body>
+<h1>订单列表</h1>
+<ul>
+    <li class="item" th:each="item : ${orders}">
+        <div>
+            商品名称：<span th:text="${item.name}">商品名称</span>
+        </div>
+        <div>
+            商品数量：<span th:text="${item.count}">商品名称</span>
+        </div>
+        <div>
+            下单时间：<span th:text="${item.orderTimeStr}">下单时间</span>
+        </div>
+        <div>
+            订单状态：<span th:text="${item.status}">订单状态</span>
+        </div>
+        <div th:if="${item.status} eq '已取消'">
+            取消原因：<span th:text="${item.cancelReason}">取消原因</span>
+        </div>
+    </li>
+</ul>
+</body>
+</html>
