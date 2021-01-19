@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        body {
+            text-align: center;
+        }
+    </style>
+</head>
+<body th:inline="text">
+<form action="/pay">
+    <input name="id" th:value="${orderId}" hidden>
+    <h1>订单<span th:text="${orderId}"></span>等待付款...</h1>
+    <div>剩余付款时间：<span id="J_Time"></span>秒</div>
+    <button type="submit">付款</button>
+</form>
+</body>
+<script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.5.1/jquery.js"></script>
+<script>
+    function countDown(time) {
+        if (time === 0) {
+            window.location="/orderlist";
+        }
+
+        $('#J_Time').html(time);
+        setTimeout(() => {
+            this.countDown(time - 1);
+        }, 1000);
+    };
+</script>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    var time = /*[[${time}]]*/ '';
+    /*]]>*/
+    if (!time) {
+        time = 1;
+    }
+    countDown(time);
+</script>
+</html>
