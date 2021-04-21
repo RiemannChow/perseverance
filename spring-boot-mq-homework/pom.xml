@@ -10,6 +10,9 @@
     <version>1.0-SNAPSHOT</version>
     <modules>
         <module>riemann-rabbitmq-order</module>
+        <module>riemann-rabbitmq-publisher-message-confirm</module>
+        <module>riemann-rabbitmq-message-persistent</module>
+        <module>riemann-rabbitmq-consumer-message-ack</module>
     </modules>
 
     <parent>
@@ -74,6 +77,10 @@
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-amqp</artifactId>
         </dependency>
     </dependencies>
 
