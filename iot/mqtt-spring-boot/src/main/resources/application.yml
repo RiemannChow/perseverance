@@ -1,0 +1,12 @@
+mqtt:
+  host: tcp://your ip:1883
+  clientId: client_${random.value}
+  topic: test/system/module/biz
+  qoslevel: 1
+  username: mosquitto
+  password: mosquitto
+  timeout: 10000
+  keepalive: 20
+
+server:
+  port: 8888
