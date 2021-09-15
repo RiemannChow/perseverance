@@ -13,6 +13,7 @@
         <module>riemann-rabbitmq-publisher-message-confirm</module>
         <module>riemann-rabbitmq-message-persistent</module>
         <module>riemann-rabbitmq-consumer-message-ack</module>
+        <module>riemann-kafka</module>
     </modules>
 
     <parent>
