@@ -7,7 +7,7 @@ import org.apache.dubbo.rpc.*;
 
 import java.time.Instant;
 
-@Activate(group = "consumer")
+@Activate(group = "originapi")
 public class TPMonitorFilter implements Filter {
 
     @Override
