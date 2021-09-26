@@ -4,7 +4,7 @@ import com.riemann.utils.ThreadLocalUtil;
 import org.apache.dubbo.common.extension.Activate;
 import org.apache.dubbo.rpc.*;
 
-@Activate(group = "consumer")
+@Activate(group = "originapi")
 public class TransportIPFilter implements Filter {
 
     @Override
