@@ -8,7 +8,8 @@ import org.mybatis.caches.redis.RedisCache;
 import java.util.List;
 
 // @CacheNamespace(implementation = RedisCache.class) // redis开启分布式二级缓存
-@CacheNamespace(implementation = PerpetualCache.class) // 开启二级缓存
+// @CacheNamespace(implementation = PerpetualCache.class) // 开启二级缓存
+@CacheNamespace // 开启二级缓存
 public interface UserMapper {
 
     // 查询所有用户、同时查询每个用户关联的订单信息 (一对多的接口)
@@ -39,7 +40,7 @@ public interface UserMapper {
 
     // 更新用户 (注解形式)
     @Update("update user set username = #{username} where id = #{id}")
-    void updateUser(User user);
+    Integer updateUser(User user);
 
     // 查询用户 (注解形式)
     @Select("select * from user")
